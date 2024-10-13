@@ -11,6 +11,10 @@ struct SignView: View {
     
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var showAlert: Bool = false
+    @State private var message: String = ""
+    
+   let _auth = Authentication()
     
     var body: some View {
         HStack{
@@ -26,7 +30,15 @@ struct SignView: View {
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disableAutocorrection(true)
                 Button("Sign In"){
-                    
+                    _auth.signIn(email: email, password: password) { result, isSuccess in
+                        if(isSuccess){
+                            print("Success - \(result))")
+                        } else {
+                            print(result)
+                            message = result
+                            showAlert.toggle()
+                        }
+                    }
                 }
                 
                 Divider()
@@ -52,6 +64,13 @@ struct SignView: View {
         
     }
         .padding()
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("Warning"),
+                message: Text(message),
+                dismissButton: .default(Text("Ok"))
+            )
+        }
     }
 }
 
