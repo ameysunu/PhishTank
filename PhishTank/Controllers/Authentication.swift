@@ -19,6 +19,22 @@ class Authentication {
         }
     }
     
+    func registerUser(email: String, password: String, confirmPassword: String, completion: @escaping (String, Bool) -> Void){
+        if(password != confirmPassword){
+            completion("Passwords do not match", false)
+        } else {
+            Auth.auth().createUser(withEmail: email, password: password){ result, error in
+                
+                if let error = error as? NSError {
+                    completion(error.localizedDescription, false)
+                } else {
+                    completion("Registered successfully", true)
+                }
+                
+            }
+        }
+    }
+    
     func errorCodeSwitcher(error: NSError) -> String {
         switch AuthErrorCode(rawValue: error.code){
         case .networkError:

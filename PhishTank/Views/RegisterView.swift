@@ -39,7 +39,7 @@ struct RegisterView: View {
                    let validator = _auth.emailPasswordValidator(email: email, password: password)
                     
                     if(validator.1){
-                        _auth.signIn(email: email, password: password) { result, isSuccess in
+                        _auth.registerUser(email: email, password: password, confirmPassword: confirmPassword) { result, isSuccess in
                             if(isSuccess){
                                 print("Success - \(result))")
                             } else {
