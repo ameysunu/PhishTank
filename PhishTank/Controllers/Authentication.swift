@@ -34,4 +34,24 @@ class Authentication {
         }
     }
     
+    func emailPasswordValidator(email: String, password: String) -> (String, Bool){
+        if(email.isEmpty){
+            return("Please fill out the email address", false)
+        }
+        
+        let emailRegex = "^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}$"
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
+        let isValid = emailPredicate.evaluate(with: email)
+        
+        if(!isValid){
+            return("Badly formatted email address", false)
+        }
+        
+        if(password.count < 6){
+            return("Password length is minimum 6 characters", false)
+        }
+        
+        return("Success", true)
+    }
+    
 }

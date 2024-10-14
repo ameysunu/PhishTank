@@ -30,14 +30,21 @@ struct SignView: View {
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disableAutocorrection(true)
                 Button("Sign In"){
-                    _auth.signIn(email: email, password: password) { result, isSuccess in
-                        if(isSuccess){
-                            print("Success - \(result))")
-                        } else {
-                            print(result)
-                            message = result
-                            showAlert.toggle()
-                        }
+                   let validator = _auth.emailPasswordValidator(email: email, password: password)
+                    
+                    if(validator.1){
+                        _auth.signIn(email: email, password: password) { result, isSuccess in
+                            if(isSuccess){
+                                print("Success - \(result))")
+                            } else {
+                                print(result)
+                                message = result
+                                showAlert.toggle()
+                            }
+                    }
+                    } else {
+                        message = validator.0
+                        showAlert.toggle()
                     }
                 }
                 
