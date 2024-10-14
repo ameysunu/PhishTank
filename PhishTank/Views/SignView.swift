@@ -13,6 +13,7 @@ struct SignView: View {
     @State private var password: String = ""
     @State private var showAlert: Bool = false
     @State private var message: String = ""
+    @State private var registerToggled: Bool = false
     
    let _auth = Authentication()
     
@@ -58,6 +59,9 @@ struct SignView: View {
                 Text("Don't have an account? Create now")
                     .font(.title3)
                     .padding(.top)
+                    .onTapGesture {
+                        registerToggled = true
+                    }
             }
             
             Rectangle()
@@ -77,6 +81,9 @@ struct SignView: View {
                 message: Text(message),
                 dismissButton: .default(Text("Ok"))
             )
+        }
+        .sheet(isPresented: $registerToggled) {
+            RegisterView(isPresented: $registerToggled)
         }
     }
 }
