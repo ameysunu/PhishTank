@@ -69,8 +69,21 @@ struct SignView: View {
                 .foregroundColor(.gray)
                 .padding(.horizontal)
             
-            VStack{
+            VStack(alignment: .leading){
+                HStack {
+                    Image("FirebaseAuthentication")
+                        .resizable()
+                        .frame(width: 90, height: 81.75)
+                    
+                    Image("GoogleIAM")
+                        .resizable()
+                        .frame(width: 68, height: 68)
+                }
                 
+                Text("Authentication Powered by Firebase and Google Identity Platform")
+                    .font(.system(size: 12, weight: .light))
+                    .foregroundColor(.gray)
+                    .padding(.top, 10)
             }
         
     }
