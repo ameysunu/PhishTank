@@ -6,6 +6,8 @@
 //
 
 import FirebaseAuth
+import AppKit
+import GoogleSignIn
 
 class Authentication {
     
@@ -32,6 +34,27 @@ class Authentication {
                 }
                 
             }
+        }
+    }
+    
+    func googleSignIn() {
+        guard let window = NSApplication.shared.keyWindow else {
+            print("No active window found.")
+            return
+        }
+
+        GIDSignIn.sharedInstance.signIn(withPresenting: window) { signInResult, error in
+            if let error = error {
+                print("Google Sign-In failed: \(error.localizedDescription)")
+                return
+            }
+
+            guard let result = signInResult else {
+                print("No sign-in result found.")
+                return
+            }
+
+            print("Sign-In successful! User: \(result.user.profile?.email ?? "Unknown Email")")
         }
     }
     

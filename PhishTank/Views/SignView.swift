@@ -53,7 +53,7 @@ struct SignView: View {
                     .padding()
                 
                 Button("Sign in with Google"){
-                    
+                    _auth.googleSignIn()
                 }
                 
                 Text("Don't have an account? Create now")
