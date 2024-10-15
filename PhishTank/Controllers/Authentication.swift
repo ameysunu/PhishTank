@@ -37,6 +37,7 @@ class Authentication {
         }
     }
     
+    @MainActor
     func googleSignIn() {
         guard let window = NSApplication.shared.keyWindow else {
             print("No active window found.")
