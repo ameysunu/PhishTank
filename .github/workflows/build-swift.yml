@@ -24,10 +24,10 @@ jobs:
 
     - name: Set up Swift environment
       run: |
-        # Set the path to use the newly installed Swift version
         sudo ln -sfn /Library/Developer/Toolchains/swift-6.0.0.xctoolchain/usr/bin/swift /usr/local/bin/swift
         swift --version  # Check if the correct Swift version is being used
 
-    - name: Build
-      run: swift build -v
+    - name: Build with Swift 6.0.0
+      run: |
+        /Library/Developer/Toolchains/swift-6.0.0.xctoolchain/usr/bin/swift build
 
