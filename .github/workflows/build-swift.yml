@@ -14,6 +14,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Install Swift 6.0.0
+      run: |
+        # Download Swift 6.0.0 toolchain
+        wget https://download.swift.org/swift-6.0.0-release/7/Swift-6.0.0-RELEASE/swift-6.0.0-RELEASE-osx.pkg -O swift-6.0.0.pkg
+        # Install the package
+        sudo installer -pkg swift-6.0.0.pkg -target /
+
+    - name: Set up Swift environment
+      run: |
+        # Set the path to use the newly installed Swift version
+        sudo ln -sfn /Library/Developer/Toolchains/swift-6.0.0.xctoolchain/usr/bin/swift /usr/local/bin/swift
+        swift --version  # Check if the correct Swift version is being used
+
     - name: Build
       run: swift build -v
 
