@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.googleusercontent.apps.1088509938140-6rn3hhe7illd23jj24jdqrn16nkldpoq</string>
+            </array>
+        </dict>
+    </array>
+	<key>GIDClientID</key>
+	<string>1088509938140-6rn3hhe7illd23jj24jdqrn16nkldpoq.apps.googleusercontent.com</string>
+</dict>
+</plist>
