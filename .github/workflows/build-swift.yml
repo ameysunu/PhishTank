@@ -18,7 +18,7 @@ jobs:
     - name: Install Swift 6.0.0
       run: |
         # Download Swift 6.0.0 toolchain
-        wget https://download.swift.org/swift-6.0.0-release/7/Swift-6.0.0-RELEASE/swift-6.0.0-RELEASE-osx.pkg -O swift-6.0.0.pkg
+        wget https://download.swift.org/swift-6.0.1-release/xcode/swift-6.0.1-RELEASE/swift-6.0.1-RELEASE-osx.pkg -O swift-6.0.0.pkg
         # Install the package
         sudo installer -pkg swift-6.0.0.pkg -target /
 
