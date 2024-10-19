@@ -10,24 +10,12 @@ on:
 jobs:
   build:
 
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install Swift 6.0.0
+    - name: Build
       run: |
-        # Download Swift 6.0.0 toolchain
-        wget https://download.swift.org/swift-6.0.1-release/xcode/swift-6.0.1-RELEASE/swift-6.0.1-RELEASE-osx.pkg -O swift-6.0.0.pkg
-        # Install the package
-        sudo installer -pkg swift-6.0.0.pkg -target /
-
-    - name: Set up Swift environment
-      run: |
-        sudo ln -sfn /Library/Developer/Toolchains/swift-6.0.0.xctoolchain/usr/bin/swift /usr/local/bin/swift
-        swift --version  # Check if the correct Swift version is being used
-
-    - name: Build with Swift 6.0.0
-      run: |
-        /Library/Developer/Toolchains/swift-6.0.0.xctoolchain/usr/bin/swift build
+        swift build
 
