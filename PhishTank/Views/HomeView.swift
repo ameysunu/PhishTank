@@ -12,12 +12,15 @@ struct HomeView: View {
     
     var user: GIDGoogleUser?
     
-    let items: [(String, String)] = [("Phishing", "Check for phishing texts or emails"), ("Breaches", "Check if your email has been in a potential breach"), ("Recents", "Your recent activities")]
+    let items: [(String, String, SheetType)] = [("Phishing", "Check for phishing texts or emails", .phishing), ("Breaches", "Check if your email has been in a potential breach", .breach), ("Recents", "Your recent activities", .recents)]
+    
     let columns = [
            GridItem(.flexible()),
            GridItem(.flexible()),
            GridItem(.flexible())
        ]
+    
+    @State private var selectedItem: SheetType? = nil
     
     var body: some View {
         VStack(alignment: .leading){
@@ -37,6 +40,9 @@ struct HomeView: View {
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
+                        }
+                        .onTapGesture {
+                            selectedItem = item.2
                         }
                             .aspectRatio(1, contentMode: .fit)
                             .frame(maxWidth: .infinity)
@@ -58,6 +64,29 @@ struct HomeView: View {
             }
         }
         .padding()
+        .sheet(item: $selectedItem) { item in
+            item.view
+        }
+    }
+}
+
+enum SheetType: Identifiable {
+    case phishing, breach, recents
+    
+    var id: Int {
+        hashValue
+    }
+    
+    @ViewBuilder
+    var view: some View {
+        switch self {
+        case .phishing:
+            Phishing()
+        case .breach:
+            Phishing()
+        case .recents:
+            Phishing()
+        }
     }
 }
 
