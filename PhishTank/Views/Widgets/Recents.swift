@@ -1,5 +1,5 @@
 //
-//  Phishing.swift
+//  Recents.swift
 //  PhishTank
 //
 //  Created by Amey Sunu on 22/10/2024.
@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-struct Phishing: View {
+struct Recents: View {
     var dismiss: () -> Void
     var body: some View {
         VStack{
             HStack{
                 
-                Text("Phishing")
+                Text("Recents")
                 Spacer()
                 Button(action:{
                     dismiss()

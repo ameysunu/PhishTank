@@ -24,8 +24,16 @@ struct HomeView: View {
     
     var body: some View {
         VStack(alignment: .leading){
-            Text("Hello, \(user?.profile?.name ?? "User")")
-                .font(.title)
+            HStack{
+                Text("Hello, \(user?.profile?.name ?? "User")")
+                    .font(.title)
+                Spacer()
+                Button(action:{
+                    GIDSignIn.sharedInstance.signOut()
+                }){
+                    Text("Logout")
+                }
+            }
             ScrollView{
                 LazyVGrid(columns: columns, spacing: 20) {
                     ForEach(items, id: \.0){ item in
@@ -65,30 +73,35 @@ struct HomeView: View {
         }
         .padding()
         .sheet(item: $selectedItem) { item in
-            item.view
+            item.view(dismiss: {
+                selectedItem = nil
+            })
         }
     }
 }
 
 enum SheetType: Identifiable {
-    case phishing, breach, recents
-    
+    case phishing
+    case breach
+    case recents
+
     var id: Int {
-        hashValue
+        self.hashValue
     }
     
     @ViewBuilder
-    var view: some View {
+    func view(dismiss: @escaping () -> Void) -> some View {
         switch self {
         case .phishing:
-            Phishing()
+            Phishing(dismiss: dismiss)
         case .breach:
-            Phishing()
+            Breach(dismiss: dismiss)
         case .recents:
-            Phishing()
+            Recents(dismiss: dismiss)
         }
     }
 }
+
 
 #Preview {
     HomeView()
