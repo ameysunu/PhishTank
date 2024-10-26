@@ -14,6 +14,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Decode and Save Info.plist
+      env:
+        ENCODED_INFO_PLIST: ${{ secrets.ENCODED_INFO_PLIST }}
+        ENCODED_GOOGLESERVICE_PLIST: ${{ secrets.ENCODED_GOOGLESERVICE_PLIST }}
+        ENCODED_SECRETS_PLIST: ${{ secrets.ENCODED_SECRETS_PLIST }}
+      run: |
+        echo "$ENCODED_INFO_PLIST" | base64 --decode > ${{ vars.SCHEME_NAME }}/Info.plist
+        echo "$ENCODED_GOOGLESERVICE_PLIST" | base64 --decode > ${{ vars.SCHEME_NAME }}/GoogleService-Info.plist
+        echo "$ENCODED_SECRETS_PLIST" | base64 --decode > ${{ vars.SCHEME_NAME }}/Secrets.plist
 
     - name: Build
       run: |
