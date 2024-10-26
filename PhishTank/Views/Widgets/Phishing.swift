@@ -59,7 +59,9 @@ struct Phishing: View {
                 }
                 .disabled(isLoading)
             } else {
+                
                 Text(geminiResponse)
+                    .padding()
             }
         }
         .padding()

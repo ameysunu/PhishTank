@@ -21,7 +21,7 @@ class GeminiController {
         do {
             let response = try await model.generateContent(modPrompt)
             print(response.text ?? "")
-            return response.text ?? ""
+            return sanitizeGeminiResponse(response: response.text ?? "").sanitizedText
         }
         catch {
                print("Error: \(error)")
@@ -36,5 +36,29 @@ class GeminiController {
             return plist[key] as? String
         }
         return nil
+    }
+    
+    func sanitizeGeminiResponse(response: String) -> (sanitizedText: String, phishingFactor: String?) {
+        let trimmedText = response.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        var phishingFactor: String? = nil
+        var cleanedText = trimmedText
+        
+        let pattern = "phishingFactor:\\s*(\\d+)"
+
+        if let range = cleanedText.range(of: pattern, options: .regularExpression) {
+            let match = String(cleanedText[range])
+            phishingFactor = match.components(separatedBy: ":").last?.trimmingCharacters(in: .whitespaces)
+            
+            cleanedText.removeSubrange(range)
+        }
+        
+        let lines = cleanedText.components(separatedBy: .newlines)
+        
+        let sanitizedLines = lines.map { $0.trimmingCharacters(in: .whitespaces) }
+        
+        let sanitizedText = sanitizedLines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        return (sanitizedText: sanitizedText, phishingFactor: phishingFactor)
     }
 }
