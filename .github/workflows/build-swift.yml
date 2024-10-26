@@ -27,4 +27,4 @@ jobs:
 
     - name: Build
       run: |
-        xcodebuild -scheme ${{ vars.SCHEME_NAME }} -project ${{ vars.XCODEPROJ }} -configuration Debug
+        xcodebuild -scheme ${{ vars.SCHEME_NAME }} -project ${{ vars.XCODEPROJ }} -configuration Debug CODE_SIGNING_ALLOWED=NO
