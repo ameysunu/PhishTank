@@ -7,10 +7,11 @@
 
 import Foundation
 import GoogleGenerativeAI
+import SwiftUICore
 
 class GeminiController {
     
-    func sendPhishingRequest(prompt: String) async -> String {
+    func sendPhishingRequest(prompt: String) async -> (result: String, phishingFactor: String?) {
         
         let API_KEY = getValueFromSecrets(forKey: "GEMINI_API")
         
@@ -21,11 +22,14 @@ class GeminiController {
         do {
             let response = try await model.generateContent(modPrompt)
             print(response.text ?? "")
-            return sanitizeGeminiResponse(response: response.text ?? "").sanitizedText
+            let results = sanitizeGeminiResponse(response: response.text ?? "")
+            
+            return(result: results.sanitizedText, phishingFactor: results.phishingFactor)
+            
         }
         catch {
-               print("Error: \(error)")
-            return "Error: \(error)"
+            print("Error: \(error)")
+             return(result: "Error: \(error)", phishingFactor: "0")
         }
         
     }
@@ -60,5 +64,20 @@ class GeminiController {
         let sanitizedText = sanitizedLines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
         
         return (sanitizedText: sanitizedText, phishingFactor: phishingFactor)
+    }
+    
+    func checkPhishingLevel(phishingFactor: String) -> (type: String, color: Color) {
+        print(phishingFactor)
+        if let phishInt = Int(phishingFactor){
+            if(phishInt < 3){
+                return (type: "Low", color: Color.green)
+            } else if (phishInt < 6){
+                return (type: "Average", color: Color.yellow)
+            } else {
+                return (type: "High", color: Color.red)
+            }
+        } else {
+            return (type: "Undefined", color: Color.blue)
+        }
     }
 }

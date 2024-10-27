@@ -14,6 +14,10 @@ struct Phishing: View {
     let _geminiController = GeminiController()
     @State private var isLoading = false
     @State private var geminiResponse: String = ""
+    @State private var phishingFactor: String = ""
+    
+    @State private var phishValue: String = ""
+    @State private var phishColor: Color = .secondary
 
     var body: some View {
         VStack (alignment: .leading){
@@ -44,7 +48,14 @@ struct Phishing: View {
                 Button(action:{
                     Task{
                         isLoading = true
-                        geminiResponse = await _geminiController.sendPhishingRequest(prompt: inputText)
+                        let results = await _geminiController.sendPhishingRequest(prompt: inputText)
+                        geminiResponse = results.result
+                        phishValue = results.phishingFactor ?? "0"
+                        
+                        
+                        let phishFactor = _geminiController.checkPhishingLevel(phishingFactor: results.phishingFactor ?? "")
+                        phishingFactor =  phishFactor.type
+                        phishColor = phishFactor.color
                         
                         if(!geminiResponse.isEmpty){
                             isLoading = false
@@ -60,8 +71,24 @@ struct Phishing: View {
                 .disabled(isLoading)
             } else {
                 
-                Text(geminiResponse)
-                    .padding()
+                VStack(alignment: .leading, spacing: 5){
+                    Text(phishingFactor)
+                        .font(.title2)
+                        .foregroundColor(phishColor)
+                    
+                    
+                    HStack(spacing: 2) {
+                        ForEach(0 ..< 10) { index in
+                            Rectangle()
+                                .foregroundColor(index < Int(phishValue) ?? 0 ? phishColor : Color.secondary.opacity(0.3))
+                        }
+                    }
+                    .frame(maxHeight: 10)
+                    .clipShape(Capsule())
+                    
+                    Text(geminiResponse)
+                }
+                .padding()
             }
         }
         .padding()
