@@ -52,17 +52,8 @@ jobs:
             || echo "Release already exists."
 
       - name: Upload artifact to release
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag: ${{ github.event.inputs.release_tag }}
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          release_name: ${{ github.event.inputs.release_name }}
-          body: ${{ github.event.inputs.release_description }}
-          draft: false
-          prerelease: false
-          allow_override: true
-          artifacts: dist/${{ vars.SCHEME_NAME }}.dmg
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.event.inputs.release_tag }} "dist/${{ vars.SCHEME_NAME }}.dmg" --clobber
           
