@@ -113,6 +113,12 @@ struct Breach: View {
                         }
                     }
                     
+                    Button(action: {
+                        
+                    }){
+                        Text("Learn how to make your account more secure")
+                    }
+                    
                 }
                 
                 Button(action:{
