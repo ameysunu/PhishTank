@@ -18,7 +18,8 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    #runs-on: macos-15
+    runs-on: self-hosted
     steps:
       - name: Check out the code
         uses: actions/checkout@v4
@@ -56,4 +57,4 @@ jobs:
           body: ${{ github.event.inputs.release_description }}
           files: dist/${{ vars.SCHEME_NAME }}.dmg
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
