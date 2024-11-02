@@ -47,20 +47,13 @@ jobs:
         with:
           name: "${{ vars.SCHEME_NAME }}.dmg"
           path: dist/${{ vars.SCHEME_NAME }}.dmg
-        
-      - name: Create Release
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create ${{ github.event.inputs.release_tag }} \
-            --title "${{ github.event.inputs.release_name }}" \
-            --notes "${{ github.event.inputs.release_description }}" \
-            || echo "Release already exists."
 
-      - name: Upload artifact to release
+      - name: Create Release and Upload DMG
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            ${{ vars.SCHEME_NAME }}.dmg
-          
+          tag: ${{ github.event.inputs.release_tag }}
+          name: ${{ github.event.inputs.release_name }}
+          body: ${{ github.event.inputs.release_description }}
+          files: dist/${{ vars.SCHEME_NAME }}.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
