@@ -58,8 +58,12 @@ jobs:
             || echo "Release already exists."
 
       - name: Upload artifact to release
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload ${{ github.event.inputs.release_tag }} "dist/${{ vars.SCHEME_NAME }}.dmg" --clobber
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: "dist/${{ vars.SCHEME_NAME }}.dmg"
+          asset_name: "${{ vars.SCHEME_NAME }}.dmg"
+          asset_content_type: "application/octet-stream"
           
