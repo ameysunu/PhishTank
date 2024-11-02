@@ -49,6 +49,7 @@ jobs:
           path: dist/${{ vars.SCHEME_NAME }}.dmg
         
       - name: Create Release
+        id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
