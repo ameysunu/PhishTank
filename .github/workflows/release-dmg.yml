@@ -35,7 +35,7 @@ jobs:
 
       - name: Build
         run: |
-          xcodebuild -scheme ${{ vars.SCHEME_NAME }} -project ${{ vars.XCODEPROJ }} -configuration Release CODE_SIGNING_ALLOWED=NO
+          xcodebuild -scheme ${{ vars.SCHEME_NAME }} -project ${{ vars.XCODEPROJ }} -configuration Release -derivedPath ./build CODE_SIGNING_ALLOWED=NO
 
       - name: Create DMG
         run: |
