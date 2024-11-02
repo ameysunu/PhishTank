@@ -58,6 +58,6 @@ jobs:
           tag_name: ${{ github.event.inputs.release_tag }} 
           name: ${{ github.event.inputs.release_name }}
           body: ${{ github.event.inputs.release_description }}
-          files: build/Build/Products/Release/${{ vars.SCHEME_NAME }}.app
+          files: ${{ vars.SCHEME_NAME }}.dmg
           
 
