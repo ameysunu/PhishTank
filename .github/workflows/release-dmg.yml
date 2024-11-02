@@ -20,6 +20,8 @@ jobs:
   build:
     #runs-on: macos-15
     runs-on: self-hosted
+    permissions:
+      contents: write
     steps:
       - name: Check out the code
         uses: actions/checkout@v4
@@ -51,10 +53,12 @@ jobs:
 
       - name: Create Release and Upload DMG
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.inputs.release_tag }}  # Use tag_name instead of tag
+          tag_name: ${{ github.event.inputs.release_tag }} 
           name: ${{ github.event.inputs.release_name }}
           body: ${{ github.event.inputs.release_description }}
           files: dist/${{ vars.SCHEME_NAME }}.dmg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+
