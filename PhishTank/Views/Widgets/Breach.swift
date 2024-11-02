@@ -9,11 +9,15 @@ import SwiftUI
 
 struct Breach: View {
     var dismiss: () -> Void
+    var _widController = WidgetController()
+    @State var email: String = ""
+    
     var body: some View {
-        VStack{
+        VStack (alignment: .leading, spacing: 10){
             HStack{
                 
                 Text("Breach")
+                    .font(.title)
                 Spacer()
                 Button(action:{
                     dismiss()
@@ -22,6 +26,21 @@ struct Breach: View {
                 }
                 
             }
+            
+            TextField("Email Address", text: $email)
+                .padding()
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .disableAutocorrection(true)
+            
+            Button(action:{
+                Task{
+                   await _widController.checkForEmailBreach(email: email)
+                }
+            }){
+                Text("Check")
+            }
+
+            
         }
         .padding()
     }
