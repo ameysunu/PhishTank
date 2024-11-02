@@ -57,4 +57,4 @@ jobs:
           body: ${{ github.event.inputs.release_description }}
           files: dist/${{ vars.SCHEME_NAME }}.dmg
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
