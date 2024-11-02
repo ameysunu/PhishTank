@@ -47,8 +47,8 @@ jobs:
       - name: Upload DMG as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: "${{ vars.SCHEME_NAME }}.dmg"
-          path: ${{ vars.SCHEME_NAME }}.dmg
+          name: "${{ vars.SCHEME_NAME }}.app"
+          path: ${{ github.workspace }}/build/Build/Products/Release/${{ vars.SCHEME_NAME }}.app
 
       - name: Create Release and Upload DMG
         uses: softprops/action-gh-release@v2
@@ -58,6 +58,6 @@ jobs:
           tag_name: ${{ github.event.inputs.release_tag }} 
           name: ${{ github.event.inputs.release_name }}
           body: ${{ github.event.inputs.release_description }}
-          files: ${{ vars.SCHEME_NAME }}.dmg
+          files: ${{ github.workspace }}/build/Build/Products/Release/${{ vars.SCHEME_NAME }}.app
           
 
