@@ -50,12 +50,12 @@ jobs:
 
     - name: Use Commit Message and Extracted Text
       run: |
-        commit_message="${{ env.commit_message }}"
-        file_diffs="${{ env.file_diffs }}"
-        
+        # Directly use shell variable syntax
         echo "Commit Message: $commit_message"
         echo -e "File Diffs: $file_diffs"
-
+      env:
+        commit_message: ${{ env.commit_message }}
+        file_diffs: ${{ env.file_diffs }}
 
 
     - name: Make Request to Gemini
