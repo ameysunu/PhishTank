@@ -80,9 +80,26 @@ jobs:
         echo "Commit Message: $commit_message"
         echo "Cleaned File Diffs: $cleaned_file_diffs"
 
+        # Construct JSON payload
+        json_payload=$(jq -n \
+          --arg actions "${{ vars.GEMINI_PROMPT_ACTIONS }}" \
+          --arg message "$commit_message" \
+          --arg details "$cleaned_file_diffs" \
+          '{
+            contents: [
+              {
+                parts: [
+                  {
+                    text: "\($actions) - \($message), and here are the changed file details - \($details)"
+                  }
+                ]
+              }
+            ]
+          }')
+
         # Make the API request
         response=$(curl -s -w "%{http_code}" -H "Content-Type: application/json" \
-        -d "{\"contents\":[{\"parts\":[{\"text\":\"${{ vars.GEMINI_PROMPT_ACTIONS }} - $commit_message, and here are the changed file details - $cleaned_file_diffs \"}]}]}" \
+        -d "$json_payload" \
         -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY")
 
         # Check the HTTP response code
@@ -104,6 +121,7 @@ jobs:
         echo "extracted_text<<EOF" >> $GITHUB_ENV
         echo "$text" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
+
 
 
         
