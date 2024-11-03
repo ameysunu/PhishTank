@@ -16,6 +16,9 @@ jobs:
         -d '{"contents":[{"parts":[{"text":"Explain how AI works"}]}]}' \
         -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY")
 
+        # Converting JSON
+        response=$(echo "$response" | jq -c .)
+        
         echo "response=$response" >> $GITHUB_ENV
         
     - name: Use Gemini Response
