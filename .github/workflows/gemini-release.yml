@@ -5,6 +5,9 @@ on: [workflow_dispatch]
 jobs:
   gemini_integration:
     runs-on: self-hosted 
+    permissions:
+      contents: write 
+      actions: write 
 
     steps:
 
