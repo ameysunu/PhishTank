@@ -52,11 +52,19 @@ jobs:
       run: |
         # Directly use shell variable syntax
         echo "Commit Message: $commit_message"
-        echo -e "File Diffs: $file_diffs"
+
+        # Clean and flatten file diffs into a single line
+        cleaned_file_diffs=$(echo -e "$file_diffs" | tr '\n' ' ' | tr -s ' ')  # Replace newlines with spaces and squeeze multiple spaces
+        echo "Cleaned File Diffs: $cleaned_file_diffs"
+
+        # Export cleaned file diffs for the next step
+        echo "cleaned_file_diffs<<EOF" >> $GITHUB_ENV
+        echo "$cleaned_file_diffs" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
       env:
         commit_message: ${{ env.commit_message }}
         file_diffs: ${{ env.file_diffs }}
-
 
     - name: Make Request to Gemini
       id: gemini_request
