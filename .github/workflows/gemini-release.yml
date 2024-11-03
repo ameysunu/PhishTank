@@ -47,6 +47,7 @@ jobs:
     - name: Use Commit Message and Extracted Text
       run: |
         echo "Commit Message: $commit_message"
+        echo "File Diffs: $file_diffs"
       env:
         commit_message: ${{ env.commit_message }}
         file_diffs: ${{ env.file_diffs }}
