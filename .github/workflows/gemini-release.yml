@@ -1,0 +1,25 @@
+name: Google Gemini Integration
+
+on: [workflow_dispatch]
+
+jobs:
+  gemini_integration:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Make Request to Gemini
+      id: gemini_request
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        response=$(curl -s -H "Content-Type: application/json" \
+        -d '{"contents":[{"parts":[{"text":"Explain how AI works"}]}]}' \
+        -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY")
+
+        echo "response=$response" >> $GITHUB_ENV
+        
+    - name: Use Gemini Response
+      run: |
+        echo "Response: $response"
+      env:
+        response: ${{ env.response }}
