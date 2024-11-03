@@ -1,0 +1,152 @@
+name: Google Gemini Integration
+
+on: [workflow_dispatch]
+
+jobs:
+  gemini_integration:
+    runs-on: self-hosted 
+    permissions:
+      contents: write 
+      actions: write 
+
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Get Commit Message and Changed File Diffs
+      id: commit_info
+      run: |
+        # Get the latest commit message
+        commit_message=$(git log -1 --pretty=%B)
+        
+        # Get the list of files changed in the latest commit
+        changed_files=$(git diff-tree --no-commit-id --name-only -r HEAD)
+
+        # Export commit message and changed files as environment variables
+        echo "commit_message<<EOF" >> $GITHUB_ENV
+        echo "$commit_message" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+        echo "changed_files<<EOF" >> $GITHUB_ENV
+        echo "$changed_files" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+        # Retrieve only the changes (diffs) made in each file
+        file_diffs=""
+        for file in $changed_files; do
+          diff=$(git diff HEAD~1 HEAD -- "$file")
+          if [ -n "$diff" ]; then
+            file_diffs="$file_diffs\n---\nFile: $file\n$diff"
+          fi
+        done
+
+        # Export file diffs as a multi-line environment variable
+        echo "file_diffs<<EOF" >> $GITHUB_ENV
+        echo -e "$file_diffs" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    - name: Use Commit Message and Extracted Text
+      run: |
+        # Directly use shell variable syntax
+        echo "Commit Message: $commit_message"
+
+        # Clean and flatten file diffs into a single line
+        cleaned_file_diffs=$(echo -e "$file_diffs" | tr '\n' ' ' | tr -s ' ')  # Replace newlines with spaces and squeeze multiple spaces
+        echo "Cleaned File Diffs: $cleaned_file_diffs"
+
+        # Export cleaned file diffs for the next step
+        echo "cleaned_file_diffs<<EOF" >> $GITHUB_ENV
+        echo "$cleaned_file_diffs" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+      env:
+        commit_message: ${{ env.commit_message }}
+        file_diffs: ${{ env.file_diffs }}
+
+    - name: Make Request to Gemini
+      id: gemini_request
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        commit_message: ${{ env.commit_message }}
+        cleaned_file_diffs: ${{ env.cleaned_file_diffs }}
+        
+      run: |
+        set -e  # Exit on error
+
+        # Print out the variables for debugging
+        echo "Commit Message: $commit_message"
+        echo "Cleaned File Diffs: $cleaned_file_diffs"
+
+        # Construct JSON payload
+        json_payload=$(jq -n \
+          --arg actions "${{ vars.GEMINI_PROMPT_ACTIONS }}" \
+          --arg message "$commit_message" \
+          --arg details "$cleaned_file_diffs" \
+          '{
+            contents: [
+              {
+                parts: [
+                  {
+                    text: "\($actions) - \($message), and here are the changed file details - \($details)"
+                  }
+                ]
+              }
+            ]
+          }')
+
+        # Make the API request
+        response=$(curl -s -w "%{http_code}" -H "Content-Type: application/json" \
+        -d "$json_payload" \
+        -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY")
+
+        # Check the HTTP response code
+        http_code=$(echo "$response" | tail -n1)
+        response_body=$(echo "$response" | sed '$d')  # Remove the last line (HTTP code)
+
+        echo "HTTP Response Code: $http_code"
+        echo "Response Body: $response_body"
+
+        # Check if the response code indicates success (200 OK)
+        if [[ "$http_code" -ne 200 ]]; then
+          echo "Error: API request failed with response code $http_code."
+          exit 1
+        fi
+
+        # Get Text from Response
+        text=$(echo "$response_body" | jq -r '.candidates[0].content.parts[0].text')
+        
+        echo "extracted_text<<EOF" >> $GITHUB_ENV
+        echo "$text" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+
+
+        
+    - name: Use Gemini Response
+      run: |
+        echo "Response: $extracted_text"
+      env:
+        response: ${{ env.extracted_text }}
+
+
+    - name: Trigger DMG Release
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'release-dmg.yml',
+            ref: 'main',
+            inputs: {
+              release_name: "New Release",
+              release_description: process.env.extracted_text,
+              release_tag: "v1.0.0"
+            }
+          });
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        extracted_text: ${{ env.extracted_text }}
