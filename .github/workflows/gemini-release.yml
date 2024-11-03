@@ -49,6 +49,7 @@ jobs:
         echo "Commit Message: $commit_message"
       env:
         commit_message: ${{ env.commit_message }}
+        file_diffs: ${{ env.file_diffs }}
 
     - name: Make Request to Gemini
       id: gemini_request
