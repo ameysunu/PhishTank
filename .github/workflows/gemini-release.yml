@@ -73,17 +73,38 @@ jobs:
         commit_message: ${{ env.commit_message }}
         cleaned_file_diffs: ${{ env.cleaned_file_diffs }}
         
-      run: |        
-        response=$(curl -s -H "Content-Type: application/json" \
+      run: |
+        set -e  # Exit on error
+
+        # Print out the variables for debugging
+        echo "Commit Message: $commit_message"
+        echo "Cleaned File Diffs: $cleaned_file_diffs"
+
+        # Make the API request
+        response=$(curl -s -w "%{http_code}" -H "Content-Type: application/json" \
         -d "{\"contents\":[{\"parts\":[{\"text\":\"${{ vars.GEMINI_PROMPT_ACTIONS }} - $commit_message, and here are the changed file details - $cleaned_file_diffs \"}]}]}" \
         -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY")
 
+        # Check the HTTP response code
+        http_code=$(echo "$response" | tail -n1)
+        response_body=$(echo "$response" | sed '$d')  # Remove the last line (HTTP code)
+
+        echo "HTTP Response Code: $http_code"
+        echo "Response Body: $response_body"
+
+        # Check if the response code indicates success (200 OK)
+        if [[ "$http_code" -ne 200 ]]; then
+          echo "Error: API request failed with response code $http_code."
+          exit 1
+        fi
+
         # Get Text from Response
-        text=$(echo "$response" | jq -r '.candidates[0].content.parts[0].text')
+        text=$(echo "$response_body" | jq -r '.candidates[0].content.parts[0].text')
         
         echo "extracted_text<<EOF" >> $GITHUB_ENV
         echo "$text" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
+
 
         
     - name: Use Gemini Response
