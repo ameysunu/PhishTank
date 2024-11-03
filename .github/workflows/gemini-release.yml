@@ -19,8 +19,28 @@ jobs:
       run: |
         commit_message=$(git log -1 --pretty=%B)
         
+        # Get the list of files changed in the latest commit
+        changed_files=$(git diff-tree --no-commit-id --name-only -r HEAD)
+
+        # Export commit message and changed files as environment variables
         echo "commit_message<<EOF" >> $GITHUB_ENV
         echo "$commit_message" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+        echo "changed_files<<EOF" >> $GITHUB_ENV
+        echo "$changed_files" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+        # Retrieve only the changes (diffs) made in each file
+        file_diffs=""
+        for file in $changed_files; do
+          diff=$(git diff HEAD~1 HEAD -- "$file")
+          file_diffs="$file_diffs\n---\nFile: $file\n$diff"
+        done
+
+        # Export file diffs as a multi-line environment variable
+        echo "file_diffs<<EOF" >> $GITHUB_ENV
+        echo -e "$file_diffs" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
 
 
