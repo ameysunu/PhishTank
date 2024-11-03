@@ -132,21 +132,21 @@ jobs:
         response: ${{ env.extracted_text }}
 
 
-    # - name: Trigger DMG Release
-    #   uses: actions/github-script@v7
-    #   with:
-    #     script: |
-    #       await github.rest.actions.createWorkflowDispatch({
-    #         owner: context.repo.owner,
-    #         repo: context.repo.repo,
-    #         workflow_id: 'release-dmg.yml',
-    #         ref: 'main',
-    #         inputs: {
-    #           release_name: "New Release",
-    #           release_description: process.env.extracted_text,
-    #           release_tag: "v1.0.0"
-    #         }
-    #       });
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     extracted_text: ${{ env.extracted_text }}
+    - name: Trigger DMG Release
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'release-dmg.yml',
+            ref: 'main',
+            inputs: {
+              release_name: "New Release",
+              release_description: process.env.extracted_text,
+              release_tag: "v1.0.0"
+            }
+          });
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        extracted_text: ${{ env.extracted_text }}
