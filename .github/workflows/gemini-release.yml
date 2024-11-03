@@ -14,9 +14,10 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Get Commit Message
-      id: commit_message
+    - name: Get Commit Message and Changed File Diffs
+      id: commit_info
       run: |
+        # Get the latest commit message
         commit_message=$(git log -1 --pretty=%B)
         
         # Get the list of files changed in the latest commit
@@ -35,7 +36,9 @@ jobs:
         file_diffs=""
         for file in $changed_files; do
           diff=$(git diff HEAD~1 HEAD -- "$file")
-          file_diffs="$file_diffs\n---\nFile: $file\n$diff"
+          if [ -n "$diff" ]; then
+            file_diffs="$file_diffs\n---\nFile: $file\n$diff"
+          fi
         done
 
         # Export file diffs as a multi-line environment variable
@@ -43,14 +46,11 @@ jobs:
         echo -e "$file_diffs" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
 
-
     - name: Use Commit Message and Extracted Text
       run: |
-        echo "Commit Message: $commit_message"
-        echo "File Diffs: $file_diffs"
-      env:
-        commit_message: ${{ env.commit_message }}
-        file_diffs: ${{ env.file_diffs }}
+        echo "Commit Message: ${{ env.commit_message }}"
+        echo -e "File Diffs: ${{ env.file_diffs }}"
+
 
     - name: Make Request to Gemini
       id: gemini_request
@@ -77,21 +77,21 @@ jobs:
         response: ${{ env.extracted_text }}
 
 
-    - name: Trigger DMG Release
-      uses: actions/github-script@v7
-      with:
-        script: |
-          await github.rest.actions.createWorkflowDispatch({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            workflow_id: 'release-dmg.yml',
-            ref: 'main',
-            inputs: {
-              release_name: "New Release",
-              release_description: process.env.extracted_text,
-              release_tag: "v1.0.0"
-            }
-          });
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        extracted_text: ${{ env.extracted_text }}
+    # - name: Trigger DMG Release
+    #   uses: actions/github-script@v7
+    #   with:
+    #     script: |
+    #       await github.rest.actions.createWorkflowDispatch({
+    #         owner: context.repo.owner,
+    #         repo: context.repo.repo,
+    #         workflow_id: 'release-dmg.yml',
+    #         ref: 'main',
+    #         inputs: {
+    #           release_name: "New Release",
+    #           release_description: process.env.extracted_text,
+    #           release_tag: "v1.0.0"
+    #         }
+    #       });
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #     extracted_text: ${{ env.extracted_text }}
