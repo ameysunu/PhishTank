@@ -24,18 +24,18 @@ jobs:
     - name: Use Commit Message and Extracted Text
       run: |
         echo "Commit Message: $commit_message"
-        echo "Extracted Text: $extracted_text"
       env:
         commit_message: ${{ env.commit_message }}
-        extracted_text: ${{ env.extracted_text }}
 
     - name: Make Request to Gemini
       id: gemini_request
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        commit_message: ${{ env.commit_message }}
+        
       run: |
         response=$(curl -s -H "Content-Type: application/json" \
-        -d '{"contents":[{"parts":[{"text":"Explain how AI works"}]}]}' \
+        -d '{"contents":[{"parts":[{"text":"${{ vars.GEMINI_PROMPT_ACTIONS }} $commit_message "}]}]}' \
         -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY")
 
         # Get Text from Response
