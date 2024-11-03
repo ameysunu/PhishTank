@@ -71,11 +71,11 @@ jobs:
       env:
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         commit_message: ${{ env.commit_message }}
-        file_diffs: ${{ env.file_diffs }}
+        cleaned_file_diffs: ${{ env.cleaned_file_diffs }}
         
       run: |        
         response=$(curl -s -H "Content-Type: application/json" \
-        -d "{\"contents\":[{\"parts\":[{\"text\":\"${{ vars.GEMINI_PROMPT_ACTIONS }} - $commit_message, and here are the changed file details - $file_diffs \"}]}]}" \
+        -d "{\"contents\":[{\"parts\":[{\"text\":\"${{ vars.GEMINI_PROMPT_ACTIONS }} - $commit_message, and here are the changed file details - $cleaned_file_diffs \"}]}]}" \
         -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY")
 
         # Get Text from Response
