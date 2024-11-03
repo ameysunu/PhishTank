@@ -7,6 +7,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Get Commit Message
+      id: commit_message
+      run: |
+        commit_message = $(git log -1 --pretty=%B)
+        echo "commit_message=$commit_message" >> $GITHUB_ENV
+
+    - name: Use Commit Message and Extracted Text
+      run: |
+        echo "Commit Message: $commit_message"
+        echo "Extracted Text: $extracted_text"
+      env:
+        commit_message: ${{ env.commit_message }}
+        extracted_text: ${{ env.extracted_text }}
+
     - name: Make Request to Gemini
       id: gemini_request
       env:
@@ -17,12 +35,14 @@ jobs:
         -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=$GEMINI_API_KEY")
 
         # Get Text from Response
-        response=$(echo "$response" | jq -r '.candidates[0].content.parts[0].text')
+        text=$(echo "$response" | jq -r '.candidates[0].content.parts[0].text')
         
-        echo "response=$response" >> $GITHUB_ENV
+        echo "extracted_text<<EOF" >> $GITHUB_ENV
+        echo "$text" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
         
     - name: Use Gemini Response
       run: |
-        echo "Response: $response"
+        echo "Response: $extracted_text"
       env:
-        response: ${{ env.response }}
+        response: ${{ env.extracted_text }}
