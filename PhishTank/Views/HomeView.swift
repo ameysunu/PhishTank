@@ -21,6 +21,7 @@ struct HomeView: View {
        ]
     
     @State private var selectedItem: SheetType? = nil
+    @AppStorage("enableMonitoring") private var enableMonitoring: Bool = false
     
     var body: some View {
         VStack(alignment: .leading){
@@ -28,6 +29,11 @@ struct HomeView: View {
                 Text("Hello, \(user?.profile?.name ?? "User")")
                     .font(.title)
                 Spacer()
+                Button(action:{
+                    selectedItem = .security
+                }){
+                    Text("Security Recommendations")
+                }
                 Button(action:{
                     GIDSignIn.sharedInstance.signOut()
                 }){
@@ -69,6 +75,16 @@ struct HomeView: View {
                     .font(.system(size: 12))
                     .foregroundColor(.gray)
                     .padding(.top, 10)
+                
+                Spacer()
+                
+                if(enableMonitoring){
+                    Button(action:{
+                        selectedItem = .monitoring
+                    }){
+                        Image(systemName: "chart.xyaxis.line")
+                    }
+                }
             }
         }
         .padding()
@@ -84,6 +100,8 @@ enum SheetType: Identifiable {
     case phishing
     case breach
     case recents
+    case security
+    case monitoring
 
     var id: Int {
         self.hashValue
@@ -98,6 +116,10 @@ enum SheetType: Identifiable {
             Breach(dismiss: dismiss)
         case .recents:
             Recents(dismiss: dismiss)
+        case .security:
+            SecurityView(dismiss: dismiss)
+        case .monitoring:
+            MonitoringView(dismiss: dismiss)
         }
     }
 }

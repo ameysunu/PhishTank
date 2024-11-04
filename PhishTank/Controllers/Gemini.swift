@@ -80,4 +80,27 @@ class GeminiController {
             return (type: "Undefined", color: Color.blue)
         }
     }
+    
+    func getBreachMeasures(prompt: String) async -> String {
+        
+        let API_KEY = getValueFromSecrets(forKey: "GEMINI_API")
+        
+        let safetySetting = SafetySetting(harmCategory: .dangerousContent, threshold: .blockNone)
+        let model = GenerativeModel(name: "gemini-1.5-flash", apiKey: API_KEY!, safetySettings: [safetySetting])
+        let modPrompt = "My email id has been in a following breach: \(prompt). Let me know if you have information about this breach, and how can I safeguard my email from such breaches. Avoid using any symbols like * in the response"
+        
+        do {
+            let response = try await model.generateContent(modPrompt)
+            print(response.text ?? "")
+            let results = sanitizeGeminiResponse(response: response.text ?? "")
+            
+            return(results.sanitizedText)
+            
+        }
+        catch {
+            print("Error: \(error)")
+             return("Error: \(error)")
+        }
+        
+    }
 }
