@@ -79,7 +79,9 @@ struct HomeView: View {
                 Spacer()
                 
                 if(enableMonitoring){
-                    Button(action:{}){
+                    Button(action:{
+                        selectedItem = .monitoring
+                    }){
                         Image(systemName: "chart.xyaxis.line")
                     }
                 }
@@ -99,6 +101,7 @@ enum SheetType: Identifiable {
     case breach
     case recents
     case security
+    case monitoring
 
     var id: Int {
         self.hashValue
@@ -115,6 +118,8 @@ enum SheetType: Identifiable {
             Recents(dismiss: dismiss)
         case .security:
             SecurityView(dismiss: dismiss)
+        case .monitoring:
+            MonitoringView(dismiss: dismiss)
         }
     }
 }
