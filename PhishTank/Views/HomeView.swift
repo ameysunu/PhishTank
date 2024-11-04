@@ -21,6 +21,7 @@ struct HomeView: View {
        ]
     
     @State private var selectedItem: SheetType? = nil
+    @AppStorage("enableMonitoring") private var enableMonitoring: Bool = false
     
     var body: some View {
         VStack(alignment: .leading){
@@ -74,6 +75,14 @@ struct HomeView: View {
                     .font(.system(size: 12))
                     .foregroundColor(.gray)
                     .padding(.top, 10)
+                
+                Spacer()
+                
+                if(enableMonitoring){
+                    Button(action:{}){
+                        Image(systemName: "chart.xyaxis.line")
+                    }
+                }
             }
         }
         .padding()
