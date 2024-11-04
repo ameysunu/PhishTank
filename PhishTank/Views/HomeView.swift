@@ -29,6 +29,11 @@ struct HomeView: View {
                     .font(.title)
                 Spacer()
                 Button(action:{
+                    selectedItem = .security
+                }){
+                    Text("Security Recommendations")
+                }
+                Button(action:{
                     GIDSignIn.sharedInstance.signOut()
                 }){
                     Text("Logout")
@@ -84,6 +89,7 @@ enum SheetType: Identifiable {
     case phishing
     case breach
     case recents
+    case security
 
     var id: Int {
         self.hashValue
@@ -98,6 +104,8 @@ enum SheetType: Identifiable {
             Breach(dismiss: dismiss)
         case .recents:
             Recents(dismiss: dismiss)
+        case .security:
+            SecurityView(dismiss: dismiss)
         }
     }
 }
