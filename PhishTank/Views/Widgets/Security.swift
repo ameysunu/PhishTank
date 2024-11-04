@@ -11,9 +11,10 @@ import GoogleSignIn
 struct SecurityView: View {
     
     var dismiss: () -> Void
-    @State private var enableMonitoring = false
-    @State private var enableProactiveReminders = false
+    @State private var enableMonitoring: Bool = UserDefaults.standard.bool(forKey: "enableMonitoring")
+    @State private var enableProactiveReminders: Bool = UserDefaults.standard.bool(forKey: "enableProactiveReminders")
     @State private var breachDays: String = ""
+    @State private var isSheetPresented: Bool = false
     
     var body: some View {
         VStack (alignment: .leading, spacing: 10){
@@ -50,6 +51,9 @@ struct SecurityView: View {
                             
                             Toggle("", isOn: $enableMonitoring)
                                 .toggleStyle(.switch)
+                                .onChange(of: enableMonitoring) { newValue in
+                                    UserDefaults.standard.set(newValue, forKey: "enableMonitoring")
+                                }
                             
                         }
                         
@@ -79,6 +83,13 @@ struct SecurityView: View {
                             
                             Toggle("", isOn: $enableProactiveReminders)
                                 .toggleStyle(.switch)
+                                .onChange(of: enableProactiveReminders) { newValue in
+                                    UserDefaults.standard.set(newValue, forKey: "enableProactiveReminders")
+                                    if newValue && !UserDefaults.standard.bool(forKey: "hasShownReminderSheet") {
+                                        isSheetPresented = true
+                                        UserDefaults.standard.set(true, forKey: "hasShownReminderSheet")
+                                    }
+                                }
                             
                         }
                         
@@ -90,7 +101,7 @@ struct SecurityView: View {
         }
         .padding()
         
-        .sheet(isPresented: $enableProactiveReminders) {
+        .sheet(isPresented: $isSheetPresented) {
             VStack(alignment: .leading){
                 Text("Enter how many days you want to wait before sending a reminder before a breach check")
                 TextField("Days", text: $breachDays)
