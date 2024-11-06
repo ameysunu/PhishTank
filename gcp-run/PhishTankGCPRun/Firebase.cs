@@ -79,4 +79,14 @@ namespace PhishTankGCPRun
             return val;
         }
     }
+
+
+    public class MainController : ControllerBase  
+    {
+        [Route("/")]
+        public ActionResult Get()
+        {
+            return Ok("Welcome to PhishTank GCP Cloud Run. You're in the right place, but not the right endpoint. \n\nProudly built by Amey with bugs :)");
+        }
+    }
 }
