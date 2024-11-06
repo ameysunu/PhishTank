@@ -30,14 +30,14 @@ namespace PhishTankGCPRun
             return firestoreDb;
         }
 
-        private static async Task<bool> AddDocumentToFirestore(FirestoreDb firestoreDb, string collectionName, string documentId, Dictionary<string, object> data)
+        private static async Task<bool> AddDocumentToFirestore(FirestoreDb firestoreDb, string collectionName, string documentId, object data)
         {
             DocumentReference docRef = firestoreDb.Collection(collectionName).Document(documentId);
             await docRef.SetAsync(data, SetOptions.MergeAll);
             return true;
         }
 
-        public async Task<String> WriteToFirestore(String collectionName, Dictionary<string, object> data, String userId)
+        public async Task<String> WriteToFirestore(String collectionName, PostParams data, String userId)
         {
             var fireStoreKeyBase64 = Environment.GetEnvironmentVariable("FIREBASE_SECRET_KEY");
             var serviceAccountKey = Encoding.UTF8.GetString(Convert.FromBase64String(fireStoreKeyBase64));
@@ -47,7 +47,8 @@ namespace PhishTankGCPRun
             try
             {
                 FirestoreDb firestoreDb = await InitializeFirestoreDb(serviceAccountKey);
-                await AddDocumentToFirestore(firestoreDb, collectionName, userId, data);
+
+                await AddDocumentToFirestore(firestoreDb, collectionName, userId, data.data);
 
                 return "Succesfully added!";
             }
@@ -63,8 +64,19 @@ namespace PhishTankGCPRun
     public class PostParams
     {
         public bool isBreach { get; set; }
-        public Dictionary<string, object> data { get; set; }
+        public PayloadData data { get; set; }
         public string userId { get; set; }
+    }
+
+    [FirestoreData]
+    public class PayloadData
+    {
+        [FirestoreProperty]
+        public string textValue { get; set; }
+        [FirestoreProperty]
+        public string geminiResult { get; set; }
+        [FirestoreProperty]
+        public bool type { get; set; }
     }
 
     public class FirebaseController : ControllerBase
@@ -85,7 +97,7 @@ namespace PhishTankGCPRun
                 Console.WriteLine("Type is of breach");
                 var collectionName = "phishtank-breach-data";
 
-                var val = await firebaseInst.WriteToFirestore(collectionName, postParams.data, postParams.userId);
+                var val = await firebaseInst.WriteToFirestore(collectionName, postParams, postParams.userId);
 
                 if (val.Contains("Exception"))
                 {
