@@ -37,19 +37,17 @@ namespace PhishTankGCPRun
             return true;
         }
 
-        public async Task<String> WriteToFirestore()
+        public async Task<String> WriteToFirestore(String collectionName, Dictionary<string, object> data, String userId)
         {
             var fireStoreKeyBase64 = Environment.GetEnvironmentVariable("FIREBASE_SECRET_KEY");
             var serviceAccountKey = Encoding.UTF8.GetString(Convert.FromBase64String(fireStoreKeyBase64));
 
+            Console.WriteLine("Retrieved Service Account Key");
+
             try
             {
                 FirestoreDb firestoreDb = await InitializeFirestoreDb(serviceAccountKey);
-
-                Dictionary<string, object> testData = new Dictionary<string, object>();
-                testData.Add("Test", "Test");
-
-                await AddDocumentToFirestore(firestoreDb, "geminidata", "testId", testData);
+                await AddDocumentToFirestore(firestoreDb, collectionName, userId, data);
 
                 return "Succesfully added!";
             }
@@ -62,22 +60,53 @@ namespace PhishTankGCPRun
 
     }
 
+    public class PostParams
+    {
+        public bool isBreach { get; set; }
+        public Dictionary<string, object> data { get; set; }
+        public string userId { get; set; }
+    }
 
     public class FirebaseController : ControllerBase
     {
-        [Route("firebaseTest")]
-        public async Task<ActionResult<string>> Get()
+        [HttpPost("sendrequest")]
+        public async Task<ActionResult<string>> Post([FromBody] PostParams postParams)
         {
-            Firebase firebaseInst = new Firebase();
-            var val = await firebaseInst.WriteToFirestore();
 
-            if (val.Contains("Exception"))
+            if(postParams == null)
             {
-                return BadRequest(val);
+                return BadRequest("You almost got, but the payload is empty");
             }
 
-            return val;
+            Firebase firebaseInst = new Firebase();
+
+            if (postParams.isBreach)
+            {
+                Console.WriteLine("Type is of breach");
+                var collectionName = "phishtank-breach-data";
+
+                var val = await firebaseInst.WriteToFirestore(collectionName, postParams.data, postParams.userId);
+
+                if (val.Contains("Exception"))
+                {
+                    return BadRequest(val);
+                }
+
+                return val;
+
+            } else
+            {
+                return Ok("Done");
+            }
+
         }
+
+        [HttpGet("sendrequest")]
+        public ActionResult<string> Get()
+        {
+            return BadRequest("Ohh ohh! This endpoint only accepts POST requests :)");
+        }
+
     }
 
 
