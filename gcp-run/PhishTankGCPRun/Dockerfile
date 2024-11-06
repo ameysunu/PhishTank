@@ -3,6 +3,14 @@ WORKDIR /app
 COPY . .
 
 RUN dotnet restore
+
+# Add packages
+
+RUN dotnet add package Google.Cloud.Firestore
+RUN dotnet add package Grpc.Net.Client
+RUN dotnet add package Newtonsoft.Json
+
+
 RUN dotnet publish -c Release -o out
 
 
