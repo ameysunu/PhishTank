@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleSignIn
 
 struct Breach: View {
     var dismiss: () -> Void
@@ -154,6 +155,13 @@ struct Breach: View {
                 }
             }
             
+        }
+        .onAppear{
+            GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+                if(user?.userID != nil){
+                    _widController.user = user
+                } 
+            }
         }
         .padding()
     }
