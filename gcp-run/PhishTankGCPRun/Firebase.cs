@@ -108,6 +108,18 @@ namespace PhishTankGCPRun
 
             } else
             {
+                Console.WriteLine("Type is of phishing");
+                var collectionName = "phishtank-phish-data";
+
+                var val = await firebaseInst.WriteToFirestore(collectionName, postParams, postParams.userId);
+
+                if (val.Contains("Exception"))
+                {
+                    return BadRequest(val);
+                }
+
+                return val;
+
                 return Ok("Done");
             }
 
