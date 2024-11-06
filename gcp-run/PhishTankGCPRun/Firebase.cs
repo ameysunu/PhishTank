@@ -37,19 +37,27 @@ namespace PhishTankGCPRun
             return true;
         }
 
-        public async Task<String> WriteToFirestore() 
+        public async Task<String> WriteToFirestore()
         {
             var fireStoreKeyBase64 = Environment.GetEnvironmentVariable("FIREBASE_SECRET_KEY");
             var serviceAccountKey = Encoding.UTF8.GetString(Convert.FromBase64String(fireStoreKeyBase64));
-            FirestoreDb firestoreDb = await InitializeFirestoreDb(serviceAccountKey);
 
-            Dictionary<string, object> testData = new Dictionary<string, object>();
-            testData.Add("Test", "Test");
+            try
+            {
+                FirestoreDb firestoreDb = await InitializeFirestoreDb(serviceAccountKey);
 
-            await AddDocumentToFirestore(firestoreDb, "geminidata", "testId", testData);
+                Dictionary<string, object> testData = new Dictionary<string, object>();
+                testData.Add("Test", "Test");
 
-            return "Succesfully added!";
-        } 
+                await AddDocumentToFirestore(firestoreDb, "geminidata", "testId", testData);
+
+                return "Succesfully added!";
+            }
+            catch (Exception ex)
+            {
+                return $"Exception: {ex.Message}";
+            }
+        }
 
 
     }
@@ -58,11 +66,17 @@ namespace PhishTankGCPRun
     public class FirebaseController : ControllerBase
     {
         [Route("firebaseTest")]
-        public ActionResult<string> Get()
+        public async Task<ActionResult<string>> Get()
         {
             Firebase firebaseInst = new Firebase();
-            var val = firebaseInst.WriteToFirestore();
-            return $"{val}";
+            var val = await firebaseInst.WriteToFirestore();
+
+            if (val.Contains("Exception"))
+            {
+                return BadRequest(val);
+            }
+
+            return val;
         }
     }
 }
