@@ -8,8 +8,11 @@
 import Foundation
 import GoogleGenerativeAI
 import SwiftUICore
+import GoogleSignIn
 
 class GeminiController {
+    
+    var user: GIDGoogleUser?
     
     func sendPhishingRequest(prompt: String) async -> (result: String, phishingFactor: String?) {
         
@@ -23,6 +26,30 @@ class GeminiController {
             let response = try await model.generateContent(modPrompt)
             print(response.text ?? "")
             let results = sanitizeGeminiResponse(response: response.text ?? "")
+            
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+
+            let currentDateTime = Date()
+            let formattedDateTime = dateFormatter.string(from: currentDateTime)
+            
+            if(results.phishingFactor != "Low"){
+                
+                let payload = GCPPayload(isBreach: false, data: GCPPayloadData(textValue: prompt, geminiResult: results.sanitizedText, type: true), userId: "\(user?.userID ?? "DEFAULT")-\(formattedDateTime)")
+                    do {
+                        try await savePhishData(payload: payload)
+                    } catch {
+                    print("Failed to send data")
+                }
+                
+            } else {
+                let payload = GCPPayload(isBreach: false, data: GCPPayloadData(textValue: prompt, geminiResult: results.sanitizedText, type: false), userId: "\(user?.userID ?? "DEFAULT")-\(formattedDateTime)")
+                do {
+                    try await savePhishData(payload: payload)
+                } catch {
+                print("Failed to send data")
+            }
+            }
             
             return(result: results.sanitizedText, phishingFactor: results.phishingFactor)
             
@@ -103,4 +130,33 @@ class GeminiController {
         }
         
     }
+    
+    func savePhishData(payload: GCPPayload) async throws {
+        guard let GCP_ENDPOINT = getValueFromSecrets(forKey: "GCP_CLOUD_RUN_RECENTS_ENDPOINT"),
+              let requestUrl = URL(string: "\(GCP_ENDPOINT)/sendrequest") else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: requestUrl)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(payload)
+            request.httpBody = jsonData
+            
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("Response: \(responseString)")
+                }
+            } else {
+                throw URLError(.badServerResponse)
+            }
+        } catch {
+            throw error
+        }
+    }
+
 }

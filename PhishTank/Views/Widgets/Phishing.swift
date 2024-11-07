@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleSignIn
 
 struct Phishing: View {
     var dismiss: () -> Void
@@ -89,6 +90,13 @@ struct Phishing: View {
                     Text(geminiResponse)
                 }
                 .padding()
+            }
+        }
+        .onAppear{
+            GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+                if(user?.userID != nil){
+                    _geminiController.user = user
+                }
             }
         }
         .padding()
