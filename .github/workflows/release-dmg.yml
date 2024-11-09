@@ -36,6 +36,10 @@ jobs:
           echo "$ENCODED_GOOGLESERVICE_PLIST" | base64 --decode > ${{ vars.SCHEME_NAME }}/GoogleService-Info.plist
           echo "$ENCODED_SECRETS_PLIST" | base64 --decode > ${{ vars.SCHEME_NAME }}/Secrets.plist
 
+      - name: Resolve Swift packages
+      - run: |
+          swift package resolve
+          
       - name: Build
         run: |
           xcodebuild -scheme ${{ vars.SCHEME_NAME }} -project ${{ vars.XCODEPROJ }} -configuration Release -derivedDataPath ./build CODE_SIGNING_ALLOWED=NO
