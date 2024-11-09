@@ -35,9 +35,9 @@ jobs:
           echo "$ENCODED_INFO_PLIST" | base64 --decode > ${{ vars.SCHEME_NAME }}/Info.plist
           echo "$ENCODED_GOOGLESERVICE_PLIST" | base64 --decode > ${{ vars.SCHEME_NAME }}/GoogleService-Info.plist
           echo "$ENCODED_SECRETS_PLIST" | base64 --decode > ${{ vars.SCHEME_NAME }}/Secrets.plist
-      - name: 
+      - name: Resolve Swift Packages
         run: |
-          swift resolve packages
+          swift package resolve
           
       - name: Build
         run: |
