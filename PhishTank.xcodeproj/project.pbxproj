@@ -12,6 +12,7 @@
 		77CF0FD92CBC49E5008A8E84 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 77CF0FD82CBC49E5008A8E84 /* FirebaseAuth */; };
 		77CF0FDB2CBC49E5008A8E84 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 77CF0FDA2CBC49E5008A8E84 /* FirebaseCore */; };
 		77F3D7582CCC395B0047EA12 /* GoogleGenerativeAI in Frameworks */ = {isa = PBXBuildFile; productRef = 77F3D7572CCC395B0047EA12 /* GoogleGenerativeAI */; };
+		77F6F8B92CE012CC00E42475 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 77F6F8B82CE012CC00E42475 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 				77CF0FD92CBC49E5008A8E84 /* FirebaseAuth in Frameworks */,
 				770CFD862CBDBDD10057B1C7 /* GoogleSignIn in Frameworks */,
 				770CFD882CBDBDD10057B1C7 /* GoogleSignInSwift in Frameworks */,
+				77F6F8B92CE012CC00E42475 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +85,7 @@
 				770CFD852CBDBDD10057B1C7 /* GoogleSignIn */,
 				770CFD872CBDBDD10057B1C7 /* GoogleSignInSwift */,
 				77F3D7572CCC395B0047EA12 /* GoogleGenerativeAI */,
+				77F6F8B82CE012CC00E42475 /* FirebaseFirestore */,
 			);
 			productName = PhishTank;
 			productReference = 776EF4652CB1CFD800BDFA30 /* PhishTank.app */;
@@ -399,6 +402,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 77F3D7562CCC395B0047EA12 /* XCRemoteSwiftPackageReference "generative-ai-swift" */;
 			productName = GoogleGenerativeAI;
+		};
+		77F6F8B82CE012CC00E42475 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 77CF0FD72CBC49E5008A8E84 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
