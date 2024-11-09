@@ -48,6 +48,9 @@ namespace PhishTankGCPRun
             {
                 FirestoreDb firestoreDb = await InitializeFirestoreDb(serviceAccountKey);
 
+                var uniqueIdentifier = Guid.NewGuid().ToString();
+                data.data.id = uniqueIdentifier;
+
                 await AddDocumentToFirestore(firestoreDb, collectionName, userId, data.data);
 
                 return "Succesfully added!";
@@ -77,6 +80,8 @@ namespace PhishTankGCPRun
         public string geminiResult { get; set; }
         [FirestoreProperty]
         public bool type { get; set; }
+        [FirestoreProperty]
+        public string id { get; set; }
     }
 
     public class FirebaseController : ControllerBase
