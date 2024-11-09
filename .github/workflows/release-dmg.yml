@@ -37,8 +37,7 @@ jobs:
           echo "$ENCODED_SECRETS_PLIST" | base64 --decode > ${{ vars.SCHEME_NAME }}/Secrets.plist
 
       - name: Resolve Swift packages
-      - run: |
-          swift package resolve
+      - run: swift package resolve
           
       - name: Build
         run: |
