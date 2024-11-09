@@ -6,8 +6,11 @@
 //
 
 import Foundation
+import GoogleSignIn
 
 class WidgetController {
+    
+    var user: GIDGoogleUser?
     
     func checkForEmailBreach(email: String) async -> [BreachAnalyticsResponse.ExposedBreaches.BreachDetail]? {
         let urlString = "https://api.xposedornot.com/v1/breach-analytics?email=\(email)"
@@ -38,9 +41,50 @@ class WidgetController {
                     print("Exposed Records: \(breach.xposed_records ?? 0)")
                 }
                 
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+
+                let currentDateTime = Date()
+                let formattedDateTime = dateFormatter.string(from: currentDateTime)
+                
+                let payload = GCPPayload(
+                    isBreach: true,
+                    data: GCPPayloadData(
+                        textValue: email, geminiResult: "Total Breaches: \(breaches.count)", type: true
+                    ),
+                    userId: "\(user?.userID ?? "DEFAULT")-\(formattedDateTime)"
+                )
+                
+                do {
+                    try await saveBreachData(payload: payload)
+                } catch {
+                    print("Failed to send data")
+                }
+                
                 return breaches
             } else {
                 print("No exposed breaches found.")
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+
+                let currentDateTime = Date()
+                let formattedDateTime = dateFormatter.string(from: currentDateTime)
+                
+                let payload = GCPPayload(
+                    isBreach: true,
+                    data: GCPPayloadData(
+                        textValue: email, geminiResult: "No Breaches", type: false
+                    ),
+                    userId: "\(user?.userID ?? "DEFAULT")-\(formattedDateTime)"
+                )
+                
+                
+                do {
+                    try await saveBreachData(payload: payload)
+                } catch {
+                    print("Failed to send data")
+                }
                 
                 return nil
             }
@@ -49,6 +93,44 @@ class WidgetController {
             return nil
         }
     }
+    
+    func saveBreachData(payload: GCPPayload) async throws {
+        guard let GCP_ENDPOINT = getValueFromSecrets(forKey: "GCP_CLOUD_RUN_RECENTS_ENDPOINT"),
+              let requestUrl = URL(string: "\(GCP_ENDPOINT)/sendrequest") else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: requestUrl)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let jsonData = try JSONEncoder().encode(payload)
+            request.httpBody = jsonData
+            
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("Response: \(responseString)")
+                }
+            } else {
+                throw URLError(.badServerResponse)
+            }
+        } catch {
+            throw error
+        }
+    }
+
+    
+    func getValueFromSecrets(forKey key: String) -> String? {
+        if let path = Bundle.main.path(forResource: "Secrets", ofType: "plist"),
+           let plist = NSDictionary(contentsOfFile: path) as? [String: Any] {
+            return plist[key] as? String
+        }
+        return nil
+    }
+    
 
 }
 
@@ -67,4 +149,16 @@ struct UserDefault<T>{
             UserDefaults.standard.set(newValue, forKey: key)
         }
     }
+}
+
+struct GCPPayload: Codable{
+    var isBreach: Bool
+    var data: GCPPayloadData
+    var userId: String
+}
+
+struct GCPPayloadData: Codable{
+    var textValue: String
+    var geminiResult: String
+    var type: Bool
 }
