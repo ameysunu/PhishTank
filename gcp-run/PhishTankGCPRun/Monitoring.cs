@@ -51,7 +51,7 @@ namespace PhishTankGCPRun
 
             var geminiConfig = new GoogleGeminiConfig
             {
-                ApiKey = Environment.GetEnvironmentVariable("FIREBASE_SECRET_KEY")
+                ApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY")
             };
 
             var geminiClient = new GeminiClient(geminiConfig);
