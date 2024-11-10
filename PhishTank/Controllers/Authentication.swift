@@ -38,24 +38,28 @@ class Authentication {
     }
     
     @MainActor
-    func googleSignIn() {
+    func googleSignIn(completion: @escaping (Bool) -> Void) {
         guard let window = NSApplication.shared.keyWindow else {
             print("No active window found.")
+            completion(false)
             return
         }
 
         GIDSignIn.sharedInstance.signIn(withPresenting: window) { signInResult, error in
             if let error = error {
                 print("Google Sign-In failed: \(error.localizedDescription)")
+                completion(false)
                 return
             }
 
             guard let result = signInResult else {
                 print("No sign-in result found.")
+                completion(false)
                 return
             }
 
             print("Sign-In successful! User: \(result.user.profile?.email ?? "Unknown Email")")
+            completion(true)
         }
     }
     

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import FirebaseFirestore
+import  FirebaseFirestore
 import GoogleSignIn
 
 struct Recents: View {
