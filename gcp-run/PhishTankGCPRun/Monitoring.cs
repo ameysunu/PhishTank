@@ -55,9 +55,11 @@ namespace PhishTankGCPRun
                 ApiKey = geminiApiKey
             };
 
+            Console.WriteLine($"GEMINI API KEY = {geminiApiKey}");
+
             var geminiClient = new GeminiClient(geminiConfig);
             GeminiProcessor _gemProc = new GeminiProcessor(geminiClient);
-            var prompt = "Helllooo";
+            var prompt = $"Here is some data based on user's breaches and phishing data. Pretend that you are a monitoring engine and provide recommendations to the user based on this data.";
 
             Console.WriteLine(prompt);
 
