@@ -1,3 +1,4 @@
+using DotnetGeminiSDK;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -5,6 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddGeminiClient(config =>
+{
+    config.ApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+}
+);
 
 var app = builder.Build();
 

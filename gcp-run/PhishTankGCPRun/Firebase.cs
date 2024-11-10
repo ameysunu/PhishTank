@@ -12,7 +12,7 @@ namespace PhishTankGCPRun
     public class Firebase
     {
 
-        private static async Task<FirestoreDb> InitializeFirestoreDb(string serviceAccountKey)
+        public async Task<FirestoreDb> InitializeFirestoreDb(string serviceAccountKey)
         {
             GoogleCredential credential;
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(serviceAccountKey)))
