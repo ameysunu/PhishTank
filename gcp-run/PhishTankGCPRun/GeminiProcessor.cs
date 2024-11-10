@@ -1,5 +1,4 @@
 ﻿using DotnetGeminiSDK.Client.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PhishTankGCPRun
 {
@@ -18,6 +17,7 @@ namespace PhishTankGCPRun
 
             if(response != null)
             {
+                Console.WriteLine(response.Candidates[0].Content.Parts[0].Text);
                 return response.Candidates[0].Content.Parts[0].Text;
             }
 

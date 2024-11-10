@@ -49,14 +49,18 @@ namespace PhishTankGCPRun
                 }
             }
 
+            var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
             var geminiConfig = new GoogleGeminiConfig
             {
-                ApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY")
+                ApiKey = geminiApiKey
             };
 
             var geminiClient = new GeminiClient(geminiConfig);
             GeminiProcessor _gemProc = new GeminiProcessor(geminiClient);
             var prompt = "Helllooo";
+
+            Console.WriteLine(prompt);
+
             return await _gemProc.GeminiRun(prompt);
 
 
