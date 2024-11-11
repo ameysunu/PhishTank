@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GoogleSignIn
+import FirebaseAuth
 
 struct ContentView: View {
     
@@ -28,8 +29,16 @@ struct ContentView: View {
                         currentUser = user
                         self.isUserSignedIn = true
                     } else {
-                        print("User is logged out")
-                        self.isUserSignedIn = false
+                        print("Checking with Firebase Signin")
+                        
+                        if let firebaseUser = FirebaseAuth.Auth.auth().currentUser {
+                            print("User is signed in with Firebase")
+                            print(FirebaseAuth.Auth.auth().currentUser?.email)
+                            self.isUserSignedIn = true
+                        } else {
+                            print("User is logged out")
+                            self.isUserSignedIn = false
+                        }
                     }
                 }
             }

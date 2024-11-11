@@ -21,6 +21,14 @@ class Authentication {
         }
     }
     
+    func firebaseSignOut(){
+        do {
+            try Auth.auth().signOut()
+        } catch {
+            print("Exception caught")
+        }
+    }
+    
     func registerUser(email: String, password: String, confirmPassword: String, completion: @escaping (String, Bool) -> Void){
         if(password != confirmPassword){
             completion("Passwords do not match", false)

@@ -22,6 +22,7 @@ struct HomeView: View {
     
     @State private var selectedItem: SheetType? = nil
     @AppStorage("enableMonitoring") private var enableMonitoring: Bool = false
+    var auth = Authentication()
     
     var body: some View {
         VStack(alignment: .leading){
@@ -36,6 +37,7 @@ struct HomeView: View {
                 }
                 Button(action:{
                     GIDSignIn.sharedInstance.signOut()
+                    auth.firebaseSignOut()
                 }){
                     Text("Logout")
                 }

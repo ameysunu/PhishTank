@@ -7,10 +7,12 @@
 
 import Foundation
 import GoogleSignIn
+import FirebaseAuth
 
 class WidgetController {
     
     var user: GIDGoogleUser?
+    var firebaseUser: User?
     
     func checkForEmailBreach(email: String) async -> [BreachAnalyticsResponse.ExposedBreaches.BreachDetail]? {
         let urlString = "https://api.xposedornot.com/v1/breach-analytics?email=\(email)"
@@ -47,12 +49,23 @@ class WidgetController {
                 let currentDateTime = Date()
                 let formattedDateTime = dateFormatter.string(from: currentDateTime)
                 
+                var userId = ""
+                if(user != nil){
+                    userId = user?.userID ?? "DEFAULT"
+                } else {
+                    if(firebaseUser != nil){
+                        userId = firebaseUser?.uid ?? "DEFAULT"
+                    } else {
+                        userId = "DEFAULT"
+                    }
+                }
+                
                 let payload = GCPPayload(
                     isBreach: true,
                     data: GCPPayloadData(
                         textValue: email, geminiResult: "Total Breaches: \(breaches.count)", type: true
                     ),
-                    userId: "\(user?.userID ?? "DEFAULT")-\(formattedDateTime)"
+                    userId: "\(userId)-\(formattedDateTime)"
                 )
                 
                 do {
@@ -71,12 +84,24 @@ class WidgetController {
                 let currentDateTime = Date()
                 let formattedDateTime = dateFormatter.string(from: currentDateTime)
                 
+                
+                var userId = ""
+                if(user != nil){
+                    userId = user?.userID ?? "DEFAULT"
+                } else {
+                    if(firebaseUser != nil){
+                        userId = firebaseUser?.uid ?? "DEFAULT"
+                    } else {
+                        userId = "DEFAULT"
+                    }
+                }
+                
                 let payload = GCPPayload(
                     isBreach: true,
                     data: GCPPayloadData(
                         textValue: email, geminiResult: "No Breaches", type: false
                     ),
-                    userId: "\(user?.userID ?? "DEFAULT")-\(formattedDateTime)"
+                    userId: "\(userId)-\(formattedDateTime)"
                 )
                 
                 

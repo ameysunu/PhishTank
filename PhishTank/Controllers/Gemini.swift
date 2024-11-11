@@ -9,10 +9,12 @@ import Foundation
 import GoogleGenerativeAI
 import SwiftUICore
 import GoogleSignIn
+import FirebaseAuth
 
 class GeminiController {
     
     var user: GIDGoogleUser?
+    var firebaseUser: User?
     
     func sendPhishingRequest(prompt: String) async -> (result: String, phishingFactor: String?) {
         
@@ -33,9 +35,20 @@ class GeminiController {
             let currentDateTime = Date()
             let formattedDateTime = dateFormatter.string(from: currentDateTime)
             
+            var userId = ""
+            if(user != nil){
+                userId = user?.userID ?? "DEFAULT"
+            } else {
+                if(firebaseUser != nil){
+                    userId = firebaseUser?.uid ?? "DEFAULT"
+                } else {
+                    userId = "DEFAULT"
+                }
+            }
+            
             if(results.phishingFactor != "Low"){
                 
-                let payload = GCPPayload(isBreach: false, data: GCPPayloadData(textValue: prompt, geminiResult: results.sanitizedText, type: true), userId: "\(user?.userID ?? "DEFAULT")-\(formattedDateTime)")
+                let payload = GCPPayload(isBreach: false, data: GCPPayloadData(textValue: prompt, geminiResult: results.sanitizedText, type: true), userId: "\(userId)-\(formattedDateTime)")
                     do {
                         try await savePhishData(payload: payload)
                     } catch {
@@ -43,7 +56,7 @@ class GeminiController {
                 }
                 
             } else {
-                let payload = GCPPayload(isBreach: false, data: GCPPayloadData(textValue: prompt, geminiResult: results.sanitizedText, type: false), userId: "\(user?.userID ?? "DEFAULT")-\(formattedDateTime)")
+                let payload = GCPPayload(isBreach: false, data: GCPPayloadData(textValue: prompt, geminiResult: results.sanitizedText, type: false), userId: "\(userId)-\(formattedDateTime)")
                 do {
                     try await savePhishData(payload: payload)
                 } catch {
