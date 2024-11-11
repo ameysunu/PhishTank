@@ -13,6 +13,7 @@ namespace PhishTankGCPRun
 
         public async Task<string> GeminiRun(string prompt)
         {
+            Console.WriteLine("Prompt: " + prompt);
             var response = await _geminiClient.TextPrompt(prompt);
 
             if(response != null)
