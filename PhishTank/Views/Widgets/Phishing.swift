@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GoogleSignIn
+import FirebaseAuth
 
 struct Phishing: View {
     var dismiss: () -> Void
@@ -96,6 +97,8 @@ struct Phishing: View {
             GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
                 if(user?.userID != nil){
                     _geminiController.user = user
+                } else {
+                    _geminiController.firebaseUser = FirebaseAuth.Auth.auth().currentUser
                 }
             }
         }

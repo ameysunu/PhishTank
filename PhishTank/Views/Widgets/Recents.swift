@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
-import FirebaseFirestore
+import  FirebaseFirestore
 import GoogleSignIn
+import FirebaseAuth
 
 struct Recents: View {
     var currentUser: GIDGoogleUser?
+    var firebaseUser: User?
     var dismiss: () -> Void
     @ObservedObject private var viewModel = UserViewModel()
     
@@ -83,27 +85,67 @@ class UserViewModel: ObservableObject {
     @Published var breachData: [RecentData] = []
     private var db = Firestore.firestore()
     private var googleID: String?
+    private var firebaseUid: String?
     
-    func getGoogleSignIn(completion: @escaping () -> Void) {
+    
+    func checkIsUserSignedIn(completion: @escaping(Bool) -> Void){
+        getGoogleSignIn { success in
+            if(!success){
+                self.getFirebaseUserSignIn{ fbSuccess in
+                    if(fbSuccess){
+                        completion(true)
+                    }
+                    completion(false)
+                }
+            }
+            completion(true)
+        }
+    }
+    
+    func getGoogleSignIn(completion: @escaping (Bool) -> Void) {
         GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
             if let user = user, error == nil {
                 self.googleID = user.userID
                 print("Google ID retrieved: \(self.googleID ?? "No ID")")
-                completion()
+                completion(true)
             } else {
                 print("Error retrieving Google user: \(error?.localizedDescription ?? "Unknown error")")
-                completion()
+                completion(false)
             }
         }
     }
     
+    func getFirebaseUserSignIn(completion: @escaping (Bool) -> Void){
+        let user = FirebaseAuth.Auth.auth().currentUser
+        if(user != nil){
+            firebaseUid = user?.uid
+            completion(true)
+        } else {
+            print("User sign in failed")
+            completion(false)
+        }
+    }
+    
     func fetchPhishData() {
-        guard let googleID = self.googleID else {
-            print("No Google user ID found!")
+        var userId = ""
+        
+        if (googleID != nil) {
+            userId = googleID!
+            
+        } else {
+            print("No google user found")
+            
+            if( firebaseUid != nil ){
+                print("No firebase user found")
+                userId = firebaseUid!
+            }
+        }
+        
+        if(userId.isEmpty){
             return
         }
         
-        print("Fetching phish data for googleID: \(googleID)")
+        print("Fetching phish data for googleID: \(userId)")
         
         db.collection("phishtank-phish-data").getDocuments { (snapshot, error) in
             if let error = error {
@@ -121,8 +163,8 @@ class UserViewModel: ObservableObject {
                 self.phishData = documents.compactMap { doc in
                     let docIDPrefix = doc.documentID.split(separator: "-").first ?? ""
                     
-                    if docIDPrefix == googleID {
-                        print("Matched Google ID: \(googleID) with document ID prefix: \(docIDPrefix)")
+                    if docIDPrefix == userId {
+                        print("Matched User ID: \(userId) with document ID prefix: \(docIDPrefix)")
                         do {
                             return try doc.data(as: RecentData.self)
                         } catch {
@@ -137,12 +179,25 @@ class UserViewModel: ObservableObject {
     }
     
     func fetchBreachData() {
-        guard let googleID = self.googleID else {
-            print("No Google user ID found!")
+        var userId = ""
+        
+        if (googleID != nil) {
+            userId = googleID!
+            
+        } else {
+            print("No google user found")
+            
+            if( firebaseUid != nil ){
+                print("No firebase user found")
+                userId = firebaseUid!
+            }
+        }
+        
+        if(userId.isEmpty){
             return
         }
         
-        print("Fetching breach data for googleID: \(googleID)")
+        print("Fetching breach data for googleID: \(userId)")
         
         db.collection("phishtank-breach-data").getDocuments { (snapshot, error) in
             if let error = error {
@@ -160,7 +215,7 @@ class UserViewModel: ObservableObject {
                 self.breachData = documents.compactMap { doc in
                     let docIDPrefix = doc.documentID.split(separator: "-").first ?? ""
                     
-                    if docIDPrefix == googleID {
+                    if docIDPrefix == userId {
                         do {
                             return try doc.data(as: RecentData.self)
                         } catch {
@@ -175,9 +230,11 @@ class UserViewModel: ObservableObject {
     }
     
     func initializeDataFetching() {
-        getGoogleSignIn {
-            self.fetchPhishData()
-            self.fetchBreachData()
+        checkIsUserSignedIn{ success in
+            if(success){
+                self.fetchPhishData()
+                self.fetchBreachData()
+            }
         }
     }
 }
