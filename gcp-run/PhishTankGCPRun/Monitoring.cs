@@ -18,6 +18,16 @@ namespace PhishTankGCPRun
 
             Firebase firebaseCtrl = new Firebase();
             FirestoreDb firestoreDb = await firebaseCtrl.InitializeFirestoreDb(serviceAccountKey);
+            var phishingStringPrompt = "";
+
+            var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+            var geminiConfig = new GoogleGeminiConfig
+            {
+                ApiKey = geminiApiKey
+            };
+
+            var geminiClient = new GeminiClient(geminiConfig);
+            GeminiProcessor _gemProc = new GeminiProcessor(geminiClient);
 
             var phishingData = await GetGroupedDocumentsAsync(firestoreDb, "phishtank-phish-data");
             var breachData = await GetGroupedDocumentsAsync(firestoreDb, "phishtank-breach-data");
@@ -31,41 +41,49 @@ namespace PhishTankGCPRun
                     foreach(var docVal in doc.Value)
                     {
                         Console.WriteLine($"textVal: {docVal.textValue}");
+                        phishingStringPrompt += docVal.textValue + "\n";
                     }
-                }
-            }
 
+                    var prompt = $"Here is some data based on user's phishing data. Pretend that you are a monitoring engine and provide recommendations to the user based on this data. This is the phishing email, the user checked {phishingStringPrompt}";
+                    var geminiResult = await _gemProc.GeminiRun(prompt);
 
-            if (breachData != null)
-            {
-                foreach (var breachDoc in breachData)
-                {
-                    Console.WriteLine($"Document Id: {breachDoc.Key}");
-
-                    foreach (var docVal in breachDoc.Value)
+                    var mtrData = new MonitoringData
                     {
-                        Console.WriteLine($"textVal: {docVal.textValue}");
-                    }
+                        id = Guid.NewGuid().ToString(),
+                        textValue = geminiResult
+                    };
+
+                    await AddDocumentToFirestore(firestoreDb, "phishtank-monitoring-data", doc.Key, mtrData);
                 }
             }
 
-            var geminiApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
-            var geminiConfig = new GoogleGeminiConfig
-            {
-                ApiKey = geminiApiKey
-            };
+
+            //if (breachData != null)
+            //{
+            //    foreach (var breachDoc in breachData)
+            //    {
+            //        Console.WriteLine($"Document Id: {breachDoc.Key}");
+
+            //        foreach (var docVal in breachDoc.Value)
+            //        {
+            //            breachStringPrompt += docVal.geminiResult + "for the email" + docVal.textValue + "\n";
+            //            Console.WriteLine($"textVal: {docVal.textValue}");
+            //        }
+            //    }
+            //}
 
             Console.WriteLine($"GEMINI API KEY = {geminiApiKey}");
 
-            var geminiClient = new GeminiClient(geminiConfig);
-            GeminiProcessor _gemProc = new GeminiProcessor(geminiClient);
-            var prompt = $"Here is some data based on user's breaches and phishing data. Pretend that you are a monitoring engine and provide recommendations to the user based on this data.";
-
-            Console.WriteLine(prompt);
-
-            return await _gemProc.GeminiRun(prompt);
+            return "Success";
 
 
+        }
+
+        private static async Task<bool> AddDocumentToFirestore(FirestoreDb firestoreDb, string collectionName, string documentId, object data)
+        {
+            DocumentReference docRef = firestoreDb.Collection(collectionName).Document(documentId);
+            await docRef.SetAsync(data, SetOptions.MergeAll);
+            return true;
         }
 
         public static async Task<Dictionary<string, List<PayloadData>>> GetGroupedDocumentsAsync(FirestoreDb db, string collectionName)
@@ -130,4 +148,14 @@ namespace PhishTankGCPRun
             }
         }
     }
+
+    [FirestoreData]
+    public class MonitoringData
+    {
+        [FirestoreProperty]
+        public string id { get; set; }
+        [FirestoreProperty]
+        public string textValue { get; set; }
+    }
+
 }
