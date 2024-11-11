@@ -26,6 +26,8 @@ namespace PhishTankGCPRun
                 ApiKey = geminiApiKey
             };
 
+            Console.WriteLine($"GEMINI API KEY = {geminiApiKey}");
+
             var geminiClient = new GeminiClient(geminiConfig);
             GeminiProcessor _gemProc = new GeminiProcessor(geminiClient);
 
@@ -72,7 +74,6 @@ namespace PhishTankGCPRun
             //    }
             //}
 
-            Console.WriteLine($"GEMINI API KEY = {geminiApiKey}");
 
             return "Success";
 
